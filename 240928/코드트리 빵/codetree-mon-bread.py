@@ -5,15 +5,11 @@ arr=[]
 for i in range(N):
     arr.append(list(map(int,input().split())))
 
-# N,M=5,3
-# arr=[[0,0,0,0,0],[1,0,0,0,1],[0,0,0,0,0],[0,1,0,0,0],[0,0,0,0,1]]
 
 goal=[[-1,-1]]*(M+1) # 편의점 좌표
 for i in range(1,M+1):
     goal[i]=list(map(lambda x:int(x)-1,input().split()))
-# goal[1]=[1,2]
-# goal[2]=[3,3]
-# goal[3]=[4,0]
+
 
 man=[(-1,-1)]*(M+1)
 is_stop=[False]*(M+1)
@@ -26,7 +22,7 @@ def go_to_nextstep(si,sj,ei,ej):
     q = deque()
     q.append((si,sj))
     # v = [[] * N for _ in range(N)]
-    v = [[[] for _ in range(N)] for _ in range(N)]
+    v = [[[] for _ in range(N)] for _ in range(N)] ##
     v[si][sj]=(si,sj)
     path=[]
     while q:
@@ -71,6 +67,7 @@ def find_basecamp(si,sj):
 t=0
 while True:
     t+=1
+    ns= [(-1,-1)]*(M+1)
     for m in range(1,M+1):
         if is_stop[m]:
             continue
@@ -83,7 +80,8 @@ while True:
             # 2번 행동 : 편의점 도착하면 is_stop
             if (gi,gj)==(ni,nj):
                 is_stop[m]=True
-                arr[ni][nj] = -1
+                ns[m]=(ni,nj)
+                # arr[ni][nj] = -1
 
         elif m==t:
             gi,gj=goal[m]
@@ -91,8 +89,12 @@ while True:
             ni,nj  = find_basecamp(gi, gj)
             # 베이스캠프로 이동 후 -1처리로 칸 블록
             man[m]=(ni,nj)
-            arr[ni][nj] = -1
+            ns[m] = (ni, nj)
+            # arr[ni][nj] = -1
 
+    for m in range(1,M+1):
+        ni,nj=ns[m]
+        arr[ni][nj] = -1
 
     if is_stop.count(True)==M:
         print(t)
