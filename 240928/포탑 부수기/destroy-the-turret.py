@@ -1,90 +1,235 @@
-N, M, K = map(int, input().split())
-arr = [list(map(int, input().split())) for _ in range(N)]
-turn = [[0] * M for _ in range(N)]  # 공격한 턴수를 기록(최근공격 체크)
-
 from collections import deque
-def bfs(si,sj,ei,ej):
+
+# N, M, K= map(int,input().split())
+# arr=[]
+# for _ in range(N):
+#     arr.append(list(map(int,input().split())))
+## TC1
+# N,M,K=4,4,1
+# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
+#
+# ## TC2
+N,M,K=4,4,3
+arr = [[6,8,0,1],[0,0,0,0],[0,0,0,0],[0,0,8,0]]
+
+attack_turn=[[0]*M for _ in range(N)]
+
+def weakest():
+    mn=5000
+    mn_pot=[]
+    for i in range(N):
+        for j in range(M):
+            if arr[i][j]<=0:
+                continue
+            if mn>arr[i][j]:
+                mn=arr[i][j]
+                mn_pot=[(i,j,attack_turn[i][j])] # 행, 열, 최근 공격 turn
+            elif mn==arr[i][j]:
+                mn_pot.append((i,j,attack_turn[i][j]))
+
+    mn_pot.sort(key=lambda t:(-t[2],-(t[0]+t[1]),-t[1]))
+    # mn_pot.sort(key=lambda x:x[2],reverse=True) # turn이 클수록
+    #
+    # cur_turn=mn_pot[0][2]
+    # msum=[]
+    # max_sum=mn_pot[0][0]+mn_pot[0][1]
+    # for i,j,turn in mn_pot:
+    #     if cur_turn==turn:
+    #         if max_sum<=i+j:
+    #             msum=[(i,j)]
+    #         elif msum==i+j:
+    #             msum.append((i, j))
+    #
+    # msum.sort(key=lambda x:x[1], reverse=True)
+    # wi,wj=msum[0]
+    wi, wj =mn_pot[0][0],mn_pot[0][1]
+    arr[wi][wj]+=(N+M)
+    return wi,wj,arr[wi][wj]
+
+def strongest():
+    mn = 0
+    mn_pot = []
+    for i in range(N):
+        for j in range(M):
+            if arr[i][j]<=0:
+                continue
+            if mn < arr[i][j]:
+                mn = arr[i][j]
+                mn_pot = [(i, j, attack_turn[i][j])]  # 행, 열, 최근 공격 turn
+            elif mn == arr[i][j]:
+                mn_pot.append((i, j, attack_turn[i][j]))
+
+    # mn_pot.sort(key=lambda x: x[2])  # turn이 작을수록
+    mn_pot.sort(key=lambda t: (t[2], (t[0] + t[1]), t[1]))
+    # cur_turn = mn_pot[0][2]
+    # msum = []
+    # min_sum = mn_pot[0][0] + mn_pot[0][1]
+    # for i, j, turn in mn_pot:
+    #     if cur_turn == turn:
+    #         if min_sum >= i + j:
+    #             msum = [(i, j)]
+    #         elif msum == i + j:
+    #             msum.append((i, j))
+    #
+    # msum.sort(key=lambda x: x[1]) # 열이 작을수록
+    si,sj= mn_pot[0][0],mn_pot[0][1]
+
+    return si,sj
+
+
+
+
+
+def bfs(wi, wj, si, sj):
+    visited = [[False] * M for _ in range(N)]
+    parent = [[None] * M for _ in range(N)]  # 각 노드의 부모 노드를 저장
+    visited[wi][wj] = True
     q = deque()
-    v = [[[] for _ in range(M)] for _ in range(N)]  # 경로를 표시하기 위한 visited
+    q.append((wi, wj))
 
-    q.append((si,sj))
-    v[si][sj]=(si,sj)
-    d = arr[si][sj]             # demage
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
+    # BFS로 탐색 시작
     while q:
-        ci,cj = q.popleft()
-        if (ci,cj)==(ei,ej):            # 목적지 좌표 도달
-            arr[ei][ej]=max(0, arr[ei][ej]-d)   # 목표 d만큼 타격
-            while True:
-                ci,cj = v[ci][cj]       # 직전좌표
-                if (ci,cj)==(si,sj):    # 시작(공격자)까지 되집어 왔으면 종료
-                    return True
-                arr[ci][cj]=max(0,arr[ci][cj]-d//2)
-                fset.add((ci,cj))
+        i, j = q.popleft()
 
-        # 우선순위: 우/하/좌/상 (미방문, 조건: >0 포탑있고)
-        for di,dj in ((0,1),(1,0),(0,-1),(-1,0)):
-            ni,nj = (ci+di)%N, (cj+dj)%M    # 반대편으로 연결
-            if len(v[ni][nj])==0 and arr[ni][nj]>0:
-                q.append((ni,nj))
-                v[ni][nj]=(ci,cj)
-    # 목적지 찾지 못함!!!
-    return False
+        if (i, j) == (si, sj):  # 목표 지점에 도달하면 경로를 역추적
+            path = []
+            while (i, j) is not None:
+                path.append((i, j))  # 현재 좌표를 경로에 추가
+                if parent[i][j] is None:
+                    break  # 부모가 없으면 종료
+                i, j = parent[i][j]  # 부모 노드로 이동
+            return path[::-1]  # 경로를 반전시켜 올바른 순서로 반환
 
-def bomb(si,sj,ei,ej):
-    d = arr[si][sj]                         # demage
-    # print(ei,ej)
-    arr[ei][ej] = max(0, arr[ei][ej] - d)   # 목표 d만큼 타격
-    # 목표좌료 주변 8개에 1/2피해 (나를 제외한)
-    for di,dj in ((-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)):
-        ni, nj = (ei+di) % N, (ej+dj) % M  # 반대편으로 연결
-        if (ni,nj)!=(si,sj):
-            arr[ni][nj] = max(0, arr[ni][nj]-d//2)
-            fset.add((ni,nj))
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
 
-for T in range(1, K + 1):
-    # [1] 공격자 선정: 공격력 낮은->가장 최근 공격자->행+열(큰)->열(큰)
-    mn, mx_turn, si, sj = 5001, 0, -1, -1
+            # 경계 처리
+            if ni >= N:
+                ni = N - ni
+            elif ni < 0:
+                ni = N+ni
+
+            if nj >= M:
+                nj = M - nj
+            elif nj < 0:
+                nj = M+nj
+
+            # 공격력 0 이하인 곳은 건너뜀
+            if arr[ni][nj] <= 0:
+                continue
+
+            # 방문하지 않은 노드에 대해 탐색
+            if not visited[ni][nj]:
+                visited[ni][nj] = True
+                parent[ni][nj] = (i, j)  # 부모 노드를 현재 노드로 저장
+                q.append((ni, nj))
+
+    return False  # 경로가 없을 경우
+
+
+#
+# def bfs(wi,wj,si,sj):
+#     visited = [[False] * M for _ in range(N)]
+#     visited[wi][wj]=True
+#     q = deque()
+#     q.append([wi, wj])
+#     trace = deque()
+#
+#     # 대상까지의 최단 경로
+#     while q:
+#         v = q.popleft()
+#         for di, dj in (0, 1), (1, 0), (0, -1), (-1, 0):
+#             ni = v[0] + di
+#             nj = v[1] + dj
+#             if ni >= N:
+#                 ni = N - ni
+#             elif ni<0:
+#                 ni = N + ni
+#
+#             if nj >= M:
+#                 nj = M - nj
+#             elif nj<0:
+#                 nj = M + nj
+#
+#             if arr[ni][nj]<=0:
+#                 continue
+#
+#             if not visited[ni][nj]:
+#                 if (ni, nj) == (si, sj):
+#                     return trace
+#                 if arr[ni][nj] <= 0:  # 공격력 0 이하는 못건넘
+#                     continue
+#                 visited[ni][nj] = True
+#                 q.append([ni, nj])
+#                 trace.append([ni, nj])
+#     return False
+
+for turn in range(1,K+1):
+
+    attacked = [[False] * M for _ in range(N)]
+    # 대상자 선정
+    si, sj = strongest()
+    # 공격자 선정
+    wi,wj,pwr=weakest()
+
+    # 공격
+    trace=bfs(wi,wj,si,sj)
+    attack_turn[wi][wj] = turn
+    attacked[wi][wj]=True
+
+    if trace is not False:
+        ## 레이저 공격
+        for i,j in trace[1:-1]:
+            if arr[i][j] >0:
+                arr[i][j] -= pwr // 2
+                attacked[i][j] = True
+
+        arr[si][sj]-=pwr
+        attacked[si][sj] = True
+
+    else:
+        ## 포탄 공격
+        arr[si][sj]-=pwr
+        attacked[si][sj] = True
+        for di,dj in (1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,-1),(1,-1),(-1,1):
+            ni,nj = si-di,sj-dj
+
+            if ni >= N:
+                ni = N- ni
+            if nj >= M:
+                nj = M- nj
+
+            if arr[ni][nj]<=0 or (ni, nj) == (wi, wj):
+                continue
+            arr[ni][nj]-=pwr//2 # 주변
+            attacked[ni][nj] = True # 공격 당한 turn
+
+
+    #포탄 부서짐
+
+
+    # 공격과 무관 포탑 +1
     for i in range(N):
         for j in range(M):
-            if arr[i][j]<=0:    continue    # 포탑이 아니면 skip
-            if mn>arr[i][j] or (mn==arr[i][j] and mx_turn<turn[i][j]) or \
-                (mn==arr[i][j] and mx_turn==turn[i][j] and si+sj<i+j) or \
-                (mn==arr[i][j] and mx_turn==turn[i][j] and si+sj==i+j and sj<j):
-                mn, mx_turn, si, sj = arr[i][j], turn[i][j], i, j   # si,sj 공격자
-
-    # [2] 공격(공격당할 포탑선정) & 포탑부서짐
-    # 2-1) 공격 당할 포탑 선정: 공격력 높은->가장 오래전 공격->행+열(작은)->열(작은)
-    mx, mn_turn, ei, ej = 0, T, N, M
-    for i in range(N):
-        for j in range(M):
-            if arr[i][j]<=0:    continue    # 포탑이 아니면 skip
-            if mx<arr[i][j] or (mx==arr[i][j] and mn_turn>turn[i][j]) or \
-                (mx==arr[i][j] and mn_turn==turn[i][j] and ei+ej>i+j) or \
-                (mx==arr[i][j] and mn_turn==turn[i][j] and ei+ej==i+j and ej>j):
-                mx, mn_turn, ei, ej = arr[i][j], turn[i][j], i, j   # ei,ej 공격대상자
-
-    # 2-2) 레이저공격 (우하좌상 순서로 최단거리이동-BFS, %N, %M 처리 필요(양끝연결))
-    arr[si][sj]+=(N+M)  # 공격력 상승        # 즉시반영시 가장 센 포탑이 될 수도 있음
-    turn[si][sj]=T      # 이번턴에 공격
-    fset = set()
-    fset.add((si,sj))
-    fset.add((ei,ej))
-    if bfs(si,sj,ei,ej)==False:     # 레이저공격 실패
-
-        # 2-3) 포탄공격(레이저로 목적지 도달 못할 경우)
-        bomb(si,sj,ei,ej)
-
-    # [3] 포탑정비(공격에 상관없었던 포탑들 +1)
-    for i in range(N):
-        for j in range(M):
-            if arr[i][j]>0 and (i,j) not in fset:
+            if arr[i][j]<=0:
+                continue
+            if attacked[i][j]== True:
+                continue
+            else:
                 arr[i][j]+=1
 
-    cnt = N*M
-    for lst in arr:
-        cnt-=lst.count(0)
-    if cnt<=1:              # 남은 포탑이 1이하면 종료!
+
+    # 종료 조건
+    cnt=N*M
+    for i in range(N):
+        for j in range(M):
+            if arr[i][j]<=0:
+                cnt-=1
+    if cnt <=1:
         break
 
-print(max(map(max, arr)))
+
+si,sj=strongest()
+print(arr[si][sj])
