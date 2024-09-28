@@ -1,18 +1,18 @@
 from collections import deque
 
-N, M, K= map(int,input().split())
-arr=[]
-for _ in range(N):
-    arr.append(list(map(int,input().split())))
-# ## TC1
-# N,M,K=4,4,1
-# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
-
+# N, M, K= map(int,input().split())
+# arr=[]
+# for _ in range(N):
+#     arr.append(list(map(int,input().split())))
+## TC1
+N,M,K=4,4,1
+arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
+#
 # ## TC2
-# N,M,K=4,4,2
-# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
+# N,M,K=4,4,3
+# arr = [[6,8,0,1],[0,0,0,0],[0,0,0,0],[0,0,8,0]]
 
-attack_turn = [[0]*M for _ in range(N)]
+attack_turn=[[0]*M for _ in range(N)]
 
 def weakest():
     mn=5000
@@ -167,43 +167,44 @@ def bfs(wi, wj, si, sj):
 #     return False
 
 for turn in range(1,K+1):
+
+    attacked = [[False] * M for _ in range(N)]
+    # 대상자 선정
+    si, sj = strongest()
     # 공격자 선정
     wi,wj,pwr=weakest()
-    # 대상자 선정
-    si,sj=strongest()
 
     # 공격
     trace=bfs(wi,wj,si,sj)
     attack_turn[wi][wj] = turn
+    attacked[wi][wj]=True
 
     if trace is not False:
         ## 레이저 공격
         for i,j in trace[1:-1]:
-            arr[i][j] -= pwr // 2
-            attack_turn[i][j] = -turn
-
-        # while trace:
-        #     t=trace.popleft()
-        #     arr[t[0]][t[1]]-=pwr//2
-        #     attack_turn[t[0]][t[1]]= -turn
+            if arr[i][j] >0:
+                arr[i][j] -= pwr // 2
+                attacked[i][j] = True
 
         arr[si][sj]-=pwr
-        attack_turn[si][sj] = -turn
+        attacked[si][sj] = True
 
     else:
         ## 포탄 공격
         arr[si][sj]-=pwr
-        attack_turn[si][sj] = -turn
+        attacked[si][sj] = True
         for di,dj in (1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,-1),(1,-1),(-1,1):
             ni,nj = si-di,sj-dj
+
             if ni >= N:
                 ni = N- ni
             if nj >= M:
                 nj = M- nj
-            if (ni, nj) == (wi, wj):
+
+            if arr[ni][nj]<=0 or (ni, nj) == (wi, wj):
                 continue
             arr[ni][nj]-=pwr//2 # 주변
-            attack_turn[ni][nj] = -turn # 공격 당한 turn
+            attacked[ni][nj] = True # 공격 당한 turn
 
 
     #포탄 부서짐
@@ -214,7 +215,7 @@ for turn in range(1,K+1):
         for j in range(M):
             if arr[i][j]<=0:
                 continue
-            if attack_turn[i][j]==turn or attack_turn[i][j]== -turn:
+            if attacked[i][j]== True:
                 continue
             else:
                 arr[i][j]+=1
