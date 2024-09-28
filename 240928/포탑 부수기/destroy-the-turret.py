@@ -1,13 +1,13 @@
 from collections import deque
 
-# N, M, K= map(int,input().split())
-# arr=[]
-# for _ in range(N):
-#     arr.append(list(map(int,input().split())))
+N, M, K= map(int,input().split())
+arr=[]
+for _ in range(N):
+    arr.append(list(map(int,input().split())))
 ## TC1
-N,M,K=4,4,1
-arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
-#
+# N,M,K=4,4,1
+# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
+# #
 # ## TC2
 # N,M,K=4,4,3
 # arr = [[6,8,0,1],[0,0,0,0],[0,0,0,0],[0,0,8,0]]
