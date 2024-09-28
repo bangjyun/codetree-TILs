@@ -4,7 +4,13 @@ N, M, K= map(int,input().split())
 arr=[]
 for _ in range(N):
     arr.append(list(map(int,input().split())))
+# ## TC1
+# N,M,K=4,4,1
+# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
 
+# ## TC2
+# N,M,K=4,4,2
+# arr = [[0,1,4,4],[8,0,10,13],[8,0,11,26],[0,0,0,0]]
 
 attack_turn = [[0]*M for _ in range(N)]
 
@@ -21,21 +27,22 @@ def weakest():
             elif mn==arr[i][j]:
                 mn_pot.append((i,j,attack_turn[i][j]))
 
-    mn_pot.sort(key=lambda x:x[2],reverse=True) # turn이 클수록
-
-    cur_turn=mn_pot[0][2]
-    msum=[]
-    max_sum=mn_pot[0][0]+mn_pot[0][1]
-    for i,j,turn in mn_pot:
-        if cur_turn==turn:
-            if max_sum<=i+j:
-                msum=[(i,j)]
-            elif msum==i+j:
-                msum.append((i, j))
-
-    msum.sort(key=lambda x:x[1], reverse=True)
-    wi,wj=msum[0]
-
+    mn_pot.sort(key=lambda t:(-t[2],-(t[0]+t[1]),-t[1]))
+    # mn_pot.sort(key=lambda x:x[2],reverse=True) # turn이 클수록
+    #
+    # cur_turn=mn_pot[0][2]
+    # msum=[]
+    # max_sum=mn_pot[0][0]+mn_pot[0][1]
+    # for i,j,turn in mn_pot:
+    #     if cur_turn==turn:
+    #         if max_sum<=i+j:
+    #             msum=[(i,j)]
+    #         elif msum==i+j:
+    #             msum.append((i, j))
+    #
+    # msum.sort(key=lambda x:x[1], reverse=True)
+    # wi,wj=msum[0]
+    wi, wj =mn_pot[0][0],mn_pot[0][1]
     arr[wi][wj]+=(N+M)
     return wi,wj,arr[wi][wj]
 
@@ -52,20 +59,20 @@ def strongest():
             elif mn == arr[i][j]:
                 mn_pot.append((i, j, attack_turn[i][j]))
 
-    mn_pot.sort(key=lambda x: x[2])  # turn이 작을수록
-
-    cur_turn = mn_pot[0][2]
-    msum = []
-    min_sum = mn_pot[0][0] + mn_pot[0][1]
-    for i, j, turn in mn_pot:
-        if cur_turn == turn:
-            if min_sum >= i + j:
-                msum = [(i, j)]
-            elif msum == i + j:
-                msum.append((i, j))
-
-    msum.sort(key=lambda x: x[1]) # 열이 작을수록
-    si,sj= msum[0]
+    # mn_pot.sort(key=lambda x: x[2])  # turn이 작을수록
+    mn_pot.sort(key=lambda t: (t[2], (t[0] + t[1]), t[1]))
+    # cur_turn = mn_pot[0][2]
+    # msum = []
+    # min_sum = mn_pot[0][0] + mn_pot[0][1]
+    # for i, j, turn in mn_pot:
+    #     if cur_turn == turn:
+    #         if min_sum >= i + j:
+    #             msum = [(i, j)]
+    #         elif msum == i + j:
+    #             msum.append((i, j))
+    #
+    # msum.sort(key=lambda x: x[1]) # 열이 작을수록
+    si,sj= mn_pot[0][0],mn_pot[0][1]
 
     return si,sj
 
@@ -159,7 +166,7 @@ def bfs(wi, wj, si, sj):
 #                 trace.append([ni, nj])
 #     return False
 
-for turn in range(K):
+for turn in range(1,K+1):
     # 공격자 선정
     wi,wj,pwr=weakest()
     # 대상자 선정
