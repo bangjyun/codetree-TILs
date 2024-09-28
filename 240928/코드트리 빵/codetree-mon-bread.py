@@ -9,11 +9,11 @@ for i in range(N):
 # arr=[[0,0,0,0,0],[1,0,0,0,1],[0,0,0,0,0],[0,1,0,0,0],[0,0,0,0,1]]
 
 goal=[[-1,-1]]*(M+1) # 편의점 좌표
-# for i in range(1,M+1):
-#     goal[i]=list(map(lambda x:int(x)-1,input().split()))
-goal[1]=[1,2]
-goal[2]=[3,3]
-goal[3]=[4,0]
+for i in range(1,M+1):
+    goal[i]=list(map(lambda x:int(x)-1,input().split()))
+# goal[1]=[1,2]
+# goal[2]=[3,3]
+# goal[3]=[4,0]
 
 man=[(-1,-1)]*(M+1)
 is_stop=[False]*(M+1)
