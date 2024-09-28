@@ -93,8 +93,11 @@ while True:
             # arr[ni][nj] = -1
 
     for m in range(1,M+1):
+        if is_stop[m]:
+            continue
         ni,nj=ns[m]
-        arr[ni][nj] = -1
+        if in_range(ni,nj):
+            arr[ni][nj] = -1
 
     if is_stop.count(True)==M:
         print(t)
