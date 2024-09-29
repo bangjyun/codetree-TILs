@@ -47,7 +47,7 @@ def get_gun(idx,x,y):
         gun[idx]=0
     if len(arr[x][y])>0:
         g = max(arr[x][y])
-        gun[idx] += g
+        gun[idx] = g
         arr[x][y].remove(g)
 
 def in_range(i,j):
