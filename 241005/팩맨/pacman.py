@@ -108,13 +108,3 @@ for t in range(T):
         arr_mon[ei][ej]+=1
 
 print(len(mon))
-cn=0
-for d in dead:
-    cn+=d[3]
-print(cn)
-result=0
-for i in range(4):
-    for j in range(4):
-        if arr_dead[i][j]:
-            result+=arr_dead[i][j]
-print(result)
