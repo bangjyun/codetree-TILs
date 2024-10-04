@@ -64,7 +64,8 @@ for t in range(T):
                 if cnt>mx:
                     mx=cnt
                     path=[(nr1,nc1),(nr2,nc2),(nr3,nc3)]
-    pm=(nr3,nc3)
+    # pm=(nr3,nc3) # path의 마지막을 업데이트 해야지
+    pm=path[-1]
     # 경로 상 몬스터 제거
     if len(path)>1:
         for pi,pj in path:
