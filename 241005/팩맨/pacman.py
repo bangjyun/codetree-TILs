@@ -1,111 +1,95 @@
-M,T=map(int,input().split())
-pr,pc=map(int,input().split())
-pm=(pr-1,pc-1)
-arr_mon = [[[] for _ in range(4)] for _ in range(4)]
-# arr_dead=[[0]*4 for _ in range(4)] # 시체 맵
-arr_dead= [[[] for _ in range(4)] for _ in range(4)]
-
+M, S = map(int, input().split())
+fish = []
+si,sj = map(int, input().split())
 for _ in range(M):
-    r,c,d=map(int,input().split())
-    arr_mon[r-1][c-1].append(d-1)
-dir_map={0:(-1,0),1:(-1,-1),2:(0,-1),3:(1,-1),4:(1,0),5:(1,1),6:(0,1),7:(-1,1)}
-dead=[] #시체 배열
+    i,j,dr = map(int, input().split())
+    # [0]:i, [1]:j, [2]:dr, [3]:cnt: 군집크기
+    fish.append([i-1,j-1,dr-1,1])
 
-def in_range(i,j):
-    return 0<=i<4 and 0<=j<4
+si,sj = si-1,sj-1
+v = [[0]*4 for _ in range(4)]   # 물고기 냄새 표시
+boundary = set([(i,j) for j in range(4) for i in range(4)])
 
-for t in range(T):
-    # [1] 몬스터 복제 시도
-    ## 동일 방향 알 생성 => egg 배열에 위치, 방향 저장 -> 5에서 몬스터 배열(mon)과 몬스터 맵(arr_mon)에 저장
-    # egg=[row for row in arr_mon] # mon 그대로 복제 =>이건 얕은 복사
-    egg= [ [row[:] for row in layer] for layer in arr_mon ] #**
+#      ←,↖, ↑,↗, →,↘, ↓, ↙  : 시계 방향 => 반대로(반시계) 체크
+di = [ 0,-1,-1,-1, 0, 1, 1, 1]
+dj = [-1,-1, 0, 1, 1, 1, 0,-1]
 
-    # [2] 몬스터 이동
-    ## 자기 방향 (mon)에서 찾고 해당 방향으로 이동-> 몬스터 시체 (arr_dead) or pm or not in_range -> d=(d+1)%8 하며 확인
-    mv=[]
+def move_fish():
+    # 상어X, 범위내, 냄새X, 반시계 45도
+    for i in range(len(fish)):
+        ci,cj,dr,cnt=fish[i]
+        # 반시계방향(감소방향)으로 8방향체크(현재방향부터)
+        for k in range(8):
+            ni,nj=ci+di[(dr-k)%8], cj+dj[(dr-k)%8]
+            # 범위체크를 먼저진행하고 v[] 등 확인
+            if (ni,nj)!=(si,sj) and (ni,nj) in boundary and v[ni][nj]==0:
+                fish[i]=[ni,nj,(dr-k)%8,cnt]
+                break
+
+def shark():
+    # [3-1] 상어 3칸 연속이동, 상어위치
+    mx = -1                     # 무조건 갱신될 최악의 값으로 초기화!
+    del_set=set()
+    for d1 in (2,0,6,4):        # 상->좌->하->우
+        i1,j1=si+di[d1], sj+dj[d1]
+        if (i1,j1) not in boundary: continue    # 범위밖이면 다음방향으로...
+        for d2 in (2,0,6,4):    # 상->좌->하->우
+            i2,j2=i1+di[d2], j1+dj[d2]
+            if (i2,j2) not in boundary: continue    # 범위밖이면 다음방향으로...
+            for d3 in (2,0,6,4):    # 상->좌->하->우
+                i3,j3=i2+di[d3], j2+dj[d3]
+                if (i3,j3) not in boundary: continue    # 범위밖이면 다음방향으로...
+
+                fcnt = 0
+                shk_set = set(((i1,j1),(i2,j2),(i3,j3)))
+                for i,j,dr,cnt in fish:
+                    if (i,j) in shk_set:    # 상어의 3위치와 같은 좌표면
+                        fcnt+=cnt
+                if mx<fcnt:
+                    mx,ni,nj = fcnt,i3,j3
+                    del_set=shk_set         # 삭제할 좌표 후보
+
+    # [3-2] 물고기 삭제 전 냄새(3) 남김
+    for i in range(len(fish)-1,-1,-1):      # 삭제는 반대로 접근이 편리
+        if (fish[i][0],fish[i][1]) in del_set:
+            v[fish[i][0]][fish[i][1]]=3
+            fish.pop(i)
+
+    return ni,nj    # 상어의 최종좌표 리턴
+
+def merge(fish):
+    # 같은좌표, 같은방향의 물고기 군집 누적
+    fish.sort(key=lambda x:(x[0],x[1],x[2]))
+
+    i=1
+    while i<len(fish):
+        if fish[i-1][:3]==fish[i][:3]:  #  위치,방향 같으면
+            fish[i-1][3]+=fish[i][3]
+            fish.pop(i)
+        else:
+            i+=1
+
+for _ in range(S):              # S턴만큼 처리
+    # [1] 물고기 복제마법
+    fish_n = [x[:] for x in fish]
+
+    # [2] 모든 물고기 한칸 이동
+    move_fish()
+
+    # [3] 상어 3칸 연속이동, 상어위치 물고기삭제 및 냄새남김(3)
+    si,sj=shark()
+
+    # [4] 물고기냄새 -1
     for i in range(4):
         for j in range(4):
-            if len(arr_mon[i][j])==0:
-                continue
-            for md in sorted(arr_mon[i][j],reverse=True): ##
-                nd = md
-                for _ in range(8):
-                    ni, nj = i + dir_map[nd][0], j + dir_map[nd][1]
-                    if not in_range(ni, nj) or len(arr_dead[ni][nj]) > 0 or (ni, nj) == pm:  # 몬스터 시체(arr_dead) or pm or not in_range -> 45회전
-                        nd = (nd + 1) % 8
-                        continue
-                    else:  # 진행 가능 -> 이동
-                        # mon[i] = (ni, nj, nd)  # 방향 및 위치 업데이트
-                        arr_mon[i][j].remove(md)  # 맵에 반영
-                        mv.append((ni,nj,nd))
-                        break
-    for ni,nj,nd in mv:
-        arr_mon[ni][nj].append(nd)  # 이러면 다음 턴에 돌 때 또 처리하게 됨 -> 다 돌고 마지막에
+            if v[i][j]>0:
+                v[i][j]-=1
 
-    # [3] 팩맨 이동 -> 3칸 이동 ## 이 부분에 대한 검증/ 더 나은 방법? => bfs로 경로 저장하는 법 또 까먹음// bfs 경로 저장, 달팽이 이런 기본적인 건 암기
-    nr,nc=pm
-    mx=0
-    path=[]
-    for d1i,d1j in (dir_map[0],dir_map[2],dir_map[4],dir_map[6]): # 상좌하우
-        nr1,nc1=nr+d1i,nc+d1j
-        if not in_range(nr1,nc1):
-            continue
-        cnt1=0
-        if len(arr_mon[nr1][nc1])>0: # 몬스터 있으면
-            cnt1=len(arr_mon[nr1][nc1])
+    # [5] 복제된 물고기와 기존물고기 합치기
+    fish+=fish_n
+    merge(fish)         # 같은좌표,방향의 물고기 군집개수를 합치고 삭제
 
-        for d2i,d2j in (dir_map[0],dir_map[2],dir_map[4],dir_map[6]):
-            nr2, nc2 = nr1 + d2i, nc1 + d2j
-            if not in_range(nr2, nc2):
-                continue
-            cnt2=0
-            if len(arr_mon[nr2][nc2])>0: # 몬스터 있으면
-                cnt2=len(arr_mon[nr2][nc2])
-
-            for d3i,d3j in (dir_map[0],dir_map[2],dir_map[4],dir_map[6]):
-                nr3, nc3 = nr2 + d3i, nc2 + d3j
-                if not in_range(nr3, nc3):
-                    continue
-                cnt3=0
-                if  len(arr_mon[nr3][nc3])>0 and (nr3,nc3)!=(nr1,nc1):  # 몬스터 있으면
-                    cnt3 = len(arr_mon[nr3][nc3])
-
-                cnt=cnt1+cnt2+cnt3 #최종 잡은 수
-                if cnt>mx:
-                    mx=cnt
-                    path=[(nr1,nc1),(nr2,nc2),(nr3,nc3)]
-    # pm=(nr3,nc3) # path의 마지막을 업데이트 해야지
-    pm=path[-1]
-    # 경로 상 몬스터 제거 -> 시체 생성## ## dead가 더 많음
-    if len(path)>1:
-        for pi,pj in path:
-            arr_dead[pi][pj]+=[t+2]*len(arr_mon[pi][pj]) # 시체로 투입
-            # dead.append((pi,pj,t+2,len(arr_mon[pi][pj]))) # 시체 위치, 소멸 턴 수, 시체 수(더해지는 걸 해야 하는데 기존에 있던 걸 넣음)
-            pop_num=[]
-            if len(arr_mon[pi][pj])>0:
-                arr_mon[pi][pj] = []
-
-
-    # [4] 몬스터 시체 소멸 -> arr_dead랑 dead 배열 둘 다 생각하기
-    pop_num=[]
-    for i in range(4):
-        for j in range(4):
-            if len(arr_dead[i][j])==0:
-                continue
-            for dead_turn in sorted(arr_dead[i][j], reverse=True):  ##
-                if t==dead_turn:
-                    arr_dead[i][j].remove(dead_turn)
-
-
-    # [5] 몬스터 복제 완성 [1] 에서 egg 배열에 추가했던 것들 mon배열과 arr_mon에 추가
-    for i in range(4):
-        for j in range(4):
-            arr_mon[i][j]+=egg[i][j]
-
-
-result=0
-for i in range(4):
-    for j in range(4):
-        if arr_mon[i][j]:
-            result+=len(arr_mon[i][j])
-print(result)
+ans=0
+for i in range(len(fish)):
+    ans+=fish[i][3]
+print(ans)
