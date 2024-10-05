@@ -1,6 +1,3 @@
-import sys
-sys.stdin=open("input.txt","r")
-
 M,T=map(int,input().split())
 pr,pc=map(int,input().split())
 pm=(pr-1,pc-1)
