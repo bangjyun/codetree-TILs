@@ -2,7 +2,8 @@ M,T=map(int,input().split())
 pr,pc=map(int,input().split())
 pm=(pr-1,pc-1)
 arr_mon = [[[] for _ in range(4)] for _ in range(4)]
-arr_dead=[[0]*4 for _ in range(4)] # 시체 맵
+# arr_dead=[[0]*4 for _ in range(4)] # 시체 맵
+arr_dead= [[[] for _ in range(4)] for _ in range(4)]
 
 for _ in range(M):
     r,c,d=map(int,input().split())
@@ -26,11 +27,11 @@ for t in range(T):
         for j in range(4):
             if len(arr_mon[i][j])==0:
                 continue
-            for md in sorted(arr_mon[i][j],reverse=True):
+            for md in sorted(arr_mon[i][j],reverse=True): ##
                 nd = md
                 for _ in range(8):
                     ni, nj = i + dir_map[nd][0], j + dir_map[nd][1]
-                    if not in_range(ni, nj) or arr_dead[ni][nj] > 0 or (ni, nj) == pm:  # 몬스터 시체(arr_dead) or pm or not in_range -> 45회전
+                    if not in_range(ni, nj) or len(arr_dead[ni][nj]) > 0 or (ni, nj) == pm:  # 몬스터 시체(arr_dead) or pm or not in_range -> 45회전
                         nd = (nd + 1) % 8
                         continue
                     else:  # 진행 가능 -> 이동
@@ -78,8 +79,8 @@ for t in range(T):
     # 경로 상 몬스터 제거 -> 시체 생성## ## dead가 더 많음
     if len(path)>1:
         for pi,pj in path:
-            arr_dead[pi][pj]+=len(arr_mon[pi][pj]) # 시체로 투입
-            dead.append((pi,pj,t+2,len(arr_mon[pi][pj]))) # 시체 위치, 소멸 턴 수, 시체 수(더해지는 걸 해야 하는데 기존에 있던 걸 넣음)
+            arr_dead[pi][pj]+=[t+2]*len(arr_mon[pi][pj]) # 시체로 투입
+            # dead.append((pi,pj,t+2,len(arr_mon[pi][pj]))) # 시체 위치, 소멸 턴 수, 시체 수(더해지는 걸 해야 하는데 기존에 있던 걸 넣음)
             pop_num=[]
             if len(arr_mon[pi][pj])>0:
                 arr_mon[pi][pj] = []
@@ -87,19 +88,14 @@ for t in range(T):
 
     # [4] 몬스터 시체 소멸 -> arr_dead랑 dead 배열 둘 다 생각하기
     pop_num=[]
-    for idx,(r,c,dead_turn,dnum) in enumerate(dead):
-        if t==dead_turn: # 시체가 죽어야 하는 턴이면
-            pop_num.append(idx)
-            for i in range(4):
-                for j in range(4):
-                    if (i,j)==(r,c): #
-                        if arr_dead[i][j]-dnum>=0:
-                            arr_dead[i][j]-=dnum
-                        else:
-                            a=1
-    pop_num.sort(reverse=True)
-    for n in pop_num:
-        dead.pop(n)
+    for i in range(4):
+        for j in range(4):
+            if len(arr_dead[i][j])==0:
+                continue
+            for dead_turn in sorted(arr_dead[i][j], reverse=True):  ##
+                if t==dead_turn:
+                    arr_dead[i][j].remove(dead_turn)
+
 
     # [5] 몬스터 복제 완성 [1] 에서 egg 배열에 추가했던 것들 mon배열과 arr_mon에 추가
     for i in range(4):
