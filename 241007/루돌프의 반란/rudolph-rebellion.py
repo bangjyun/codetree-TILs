@@ -4,7 +4,7 @@
 from collections import deque
 
 #---------------------------------------------------
-pflag=1
+pflag=0
 N, M, P, C, D=map(int,input().split())
 arr=[[0]*N for _ in range(N)] # 산타 번호, 루
 rou=list(map(lambda x: int(x)-1,input().split()))
