@@ -16,7 +16,7 @@ for _ in range(P):
     arr[si-1][sj-1]=m
 
 def pprint(arr):
-    print('\n'.join(' '.join(f"{elem:>3}" for elem in layer) for layer in arr))
+    print('\n'.join(' '.join(f"{elem:>2}" for elem in layer) for layer in arr))
 
 ############ 이거 완벽히 이해하고 다시 쓰기 -> 얘만 시간 또 잡아먹음 --------------
 def bfs(): # 루에서 가까운 산(탈락 안한) 동일 반경 최소 거리, 유클리드, tlst 정렬 후 가장 가까운 목표산타 거리 반환 함수
@@ -26,13 +26,13 @@ def bfs(): # 루에서 가까운 산(탈락 안한) 동일 반경 최소 거리,
     v=[[0]*N for _ in range(N)]
     v[ri][rj]=1
 
-    di=[1,0,0,-1]
-    dj=[0,1,-1,0]
+    di=[1,0,0,-1,1,1,-1,-1]
+    dj=[0,1,-1,0,1,-1,1,-1]
 
     while q:
         nq = deque()
         for ci,cj in q:
-            for i in range(4):
+            for i in range(8):
                 ni,nj=ci+di[i],cj+dj[i]
                 if in_range(ni,nj) and v[ni][nj]==0:
                     nq.append((ni,nj))
