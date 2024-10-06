@@ -1,7 +1,6 @@
 '''
 코드트리 루돌프의 반란 2회차
 '''
-from collections import deque
 
 #---------------------------------------------------
 pflag=0
@@ -21,30 +20,14 @@ def pprint(arr):
 ############ 이거 완벽히 이해하고 다시 쓰기 -> 얘만 시간 또 잡아먹음 --------------
 def bfs(): # 루에서 가까운 산(탈락 안한) 동일 반경 최소 거리, 유클리드, tlst 정렬 후 가장 가까운 목표산타 거리 반환 함수
     tlst=[]
-    ri,rj=rou[0],rou[1]
-    q=deque([(ri,rj)])
-    v=[[0]*N for _ in range(N)]
-    v[ri][rj]=1
-
-    di=[1,0,0,-1,1,1,-1,-1]
-    dj=[0,1,-1,0,1,-1,1,-1]
-
-    while q:
-        nq = deque()
-        for ci,cj in q:
-            for i in range(8):
-                ni,nj=ci+di[i],cj+dj[i]
-                if in_range(ni,nj) and v[ni][nj]==0:
-                    nq.append((ni,nj))
-                    v[ni][nj]=v[ci][cj]+1
-                    sidx = arr[ni][nj]
-                    if sidx > 0 and santa[sidx][3] == False:  # 해당 반경 내 산타 있는 좌표 다 수집/ 탈락 안 했으면
-                        tlst.append((ni, nj))
-        if len(tlst)>0:
-            tlst.sort(key=lambda x: (dist(x[0],x[1]),-x[0], -x[1]))
-            return tlst[0] ####
-        q=nq
-    return False
+    for m in range(1,P+1):
+        si,sj,_,sout,_=santa[m]
+        if sout==False:
+            tlst.append([si,sj])
+    tlst.sort(key=lambda x:(dist(x[0],x[1]),-x[0],-x[1]))
+    if tlst[0][1]>49:
+        a=1
+    return tlst[0]
 
 def in_range(i,j):
     return 0<=i<N and 0<=j<N
