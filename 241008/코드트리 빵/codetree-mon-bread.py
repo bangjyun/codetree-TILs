@@ -7,7 +7,6 @@ for s in store:
 player=[[N]*2 for _ in range(M+1)]
 stop=[0]*(M+1)
 stop[0]=1
-
 p=0
 #================================================================================
 def pprint(arr):
@@ -27,8 +26,8 @@ def bfs1(pi,pj,idx): # pi,pj부터 편의점까지의 최소 dist 반환->편의
             ni,nj=ci+di,cj+dj
             if 0<=ni<N and 0<=nj<N and v[ni][nj]==0 and arr[ni][nj]!=-1:
                 v[ni][nj] = v[ci][cj] + 1
-                # if p: print("++++++++탐색+++++++++")
-                # if p: pprint(v)
+                if p: print("++++++++탐색+++++++++")
+                if p: pprint(v)
                 if (ni,nj)==(si,sj):  # 목표 편의점!!
                     dist=v[ni][nj]-1 # 1부터 시작했으니까 1 빼줘서 반환
                     if p: print("편의점",si,sj,"시작점",pi,pj  ,"거리",dist)
@@ -62,8 +61,6 @@ def find_basecamp(idx):
     # 플레이어 베이스캠프로 이동
     pi,pj=player[m]
     player[m]=[bi,bj]
-    # 이동 불가 처리
-    arr[bi][bj]=-1
     return bi,bj # 가장 가까운 베캠 반환
 
 def find_store_step(idx): # 이상
@@ -90,6 +87,7 @@ def find_store_step(idx): # 이상
 #----------------------------------------------
 turn=0
 while True:
+    wall_set = set()
     turn += 1 # turn의 업데이트는 처음에!
     if p: print(f"==================={turn}턴=======================")
     for m in range(1,M+1):
@@ -106,18 +104,21 @@ while True:
 
             if [ni,nj]==store[m-1]: # 편의점 도착
                 stop[m]=1 # 그 플레이어는 멈춤
-                arr[ni][nj] = -1  # 이동 불가
+                wall_set.add((ni,nj))
                 if p: print(f"=======편의점 도착 -> {m}번 플레이어=======")
                 if p: pprint(arr)
 
         elif turn==m:
+            if p:print("목표 편의점",store[m-1])
             ni,nj=find_basecamp(m) # 편의점과 가까운 베이스캠프 좌표
             if p: print(ni,nj,"베이스 캠프로 이동")
             player[m] =[ni, nj]
-            arr[ni][nj] = -1  # 이동 불가
+            wall_set.add((ni,nj))
             if p: print(f"======={m}번 플레이어 -> 베이스캠프 도착=======")
             if p: pprint(arr)
-
+        if p: print("STOP 현황",stop)
+    for wi,wj in wall_set:
+        arr[wi][wj]=-1
     if stop.count(1) == M+1: break  # 모두 도착했으면
 
 print(turn)
