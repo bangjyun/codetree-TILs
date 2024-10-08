@@ -1,6 +1,3 @@
-import sys
-sys.stdin = open("input.txt","r")
-
 N,M=map(int,input().split())
 arr=[list(map(int,input().split())) for _ in range(N)] # 베이스캠프랑 벽만 존재
 store=[list(map(lambda x:int(x)-1,input().split())) for _ in range(M)]
