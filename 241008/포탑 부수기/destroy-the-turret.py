@@ -39,7 +39,7 @@ def strong():
             elif mx == arr[i][j][0]:
                 tlst.append([i, j, arr[i][j][0], arr[i][j][1]])  # 좌표 i(행)[0], 열[1], 공격력[2], 최근 공격 턴[3]
 
-    tlst.sort(key=lambda x: (x[2], (x[0] + x[1]), x[1]))  # -> 소팅은 키가 필요
+    tlst.sort(key=lambda x: (x[3], (x[0] + x[1]), x[1]))  # -> 소팅은 키가 필요
     strongest = tlst[0]  # 좌표, 공격력, 최근 공격 턴
     return strongest
 
@@ -74,7 +74,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
     # 공격!
     si,sj,spwr,s_turn=weakest
     ei,ej,epwr,e_turn=strongest
-    arr[si][sj] = [weakest[2], weakest[3]]
+    arr[si][sj] = [weakest[2], weakest[3]] # 나중에 업데이트해야 강한 애가 안 되지
     path=bfs(si,sj,ei,ej) # 시작이랑 끝은 포함 X    # 튜플 좌표가 원소인 배열
 
     if path: # [2-1] 레이저 공격
@@ -106,7 +106,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
     for i in range(N):
         for j in range(M):
             if arr[i][j][0]>0 and (i,j) not in path: # 안 부서졌고, 공격에 참여 안 했으면
-                arr[i][j][0]+=1 # 최솟값은 0으로
+                arr[i][j][0]+=1
 
     if cnt==1:
         break
