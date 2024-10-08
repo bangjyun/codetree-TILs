@@ -23,6 +23,7 @@ def weak(turn):
     mlst.sort(key=lambda x: (-x[3], -(x[0] + x[1]), -x[1]))
     weakest = mlst[0]  # 좌표, 공격력, 최근 공격 턴
 
+
     weakest[2] += (N + M)  # N+M만큼 공격력 상승
     weakest[3] = turn  # 현재 턴이 최근 공격 turn # 여기에 40분
     return weakest
@@ -99,7 +100,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
     cnt = N * M
     for i in range(N):
         for j in range(M):
-            if arr[i][j][0]<0:
+            if arr[i][j][0]<=0:
                 arr[i][j][0]=0 # 최솟값은 0으로
                 cnt-=1
 
@@ -111,7 +112,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
             if arr[i][j][0]>0 and (i,j) not in path: # 안 부서졌고, 공격에 참여 안 했으면
                 arr[i][j][0]+=1
 
-    if cnt==1:
+    if cnt<=1:
         break
 
 last_strong=strong()
