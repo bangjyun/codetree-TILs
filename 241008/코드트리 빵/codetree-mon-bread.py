@@ -54,7 +54,6 @@ def bfs2(si,sj,idx): # 가장 가까운 베이스캠프 ,행작, 열작
             blst.sort() # 행작>열작
             return blst[0]
 
-
 def find_basecamp(idx):
     si,sj=store[idx-1]
     bi,bj=bfs2(si,sj,idx)
@@ -97,7 +96,10 @@ while True:
             #[1] 편의점 이동
             if p: print("편의점",store[m-1])
             if p: print("이동 전",player[m])
-            ni,nj= find_store_step(m)
+            try:
+                ni,nj= find_store_step(m)
+            except:
+                a=1
             player[m]=[ni,nj]
             if p: print(ni, nj, "편의점으로 이동")
             if p: print("이동 후",player[m])
@@ -107,8 +109,11 @@ while True:
                 wall_set.add((ni,nj))
                 if p: print(f"=======편의점 도착 -> {m}번 플레이어=======")
                 if p: pprint(arr)
+    for wi,wj in wall_set:
+        arr[wi][wj]=-1
 
-        elif turn==m:
+    for m in range(1, M + 1):
+        if turn==m:
             if p:print("목표 편의점",store[m-1])
             ni,nj=find_basecamp(m) # 편의점과 가까운 베이스캠프 좌표
             if p: print(ni,nj,"베이스 캠프로 이동")
@@ -117,8 +122,10 @@ while True:
             if p: print(f"======={m}번 플레이어 -> 베이스캠프 도착=======")
             if p: pprint(arr)
         if p: print("STOP 현황",stop)
+
     for wi,wj in wall_set:
         arr[wi][wj]=-1
+
     if stop.count(1) == M+1: break  # 모두 도착했으면
 
 print(turn)
