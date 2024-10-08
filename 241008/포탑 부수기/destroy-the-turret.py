@@ -15,16 +15,13 @@ def weak(turn):
                 continue
             if mn > arr[i][j][0]:
                 mn = arr[i][j][0]
-                mlst = [i, j, arr[i][j][0], arr[i][j][1]]  # 좌표, [공격력, 최근 공격 턴]
-                flag = 0
+                mlst = [[i, j, arr[i][j][0], arr[i][j][1]]] # 좌표, [공격력, 최근 공격 턴]
             elif mn == arr[i][j][0]:
                 mlst.append([i, j, arr[i][j][0], arr[i][j][1]])  # 좌표 i(행)[0], 열[1], 공격력[2], 최근 공격 턴[3]
-                flag = 1
-    if flag:  # 다차원 배열
-        mlst.sort(key=lambda x: (-x[2], -(x[0] + x[1]), -x[1]))
-        weakest = mlst[0]  # 좌표, 공격력, 최근 공격 턴
-    else:
-        weakest = mlst
+
+    mlst.sort(key=lambda x: (-x[3], -(x[0] + x[1]), -x[1]))
+    weakest = mlst[0]  # 좌표, 공격력, 최근 공격 턴
+
     weakest[2] += (N + M)  # N+M만큼 공격력 상승
     weakest[3] = turn  # 현재 턴이 최근 공격 turn # 여기에 40분
     return weakest
@@ -38,16 +35,12 @@ def strong():
                 continue
             if mx < arr[i][j][0]:  # 현재 공격력이 더 작으면
                 mx = arr[i][j][0]
-                tlst = [i, j, arr[i][j][0], arr[i][j][1]]  # 좌표, [공격력, 최근 공격 턴]
-                flag = 0
-            elif mx == mx == arr[i][j][0]:
+                tlst = [[i, j, arr[i][j][0], arr[i][j][1]]] # 좌표, [공격력, 최근 공격 턴]
+            elif mx == arr[i][j][0]:
                 tlst.append([i, j, arr[i][j][0], arr[i][j][1]])  # 좌표 i(행)[0], 열[1], 공격력[2], 최근 공격 턴[3]
-                flag = 1
-    if flag:  # 다차원 배열
-        tlst.sort(key=lambda x: (x[2], (x[0] + x[1]), x[1])) #-> 소팅은 키가 필요
-        strongest = tlst[0]  # 좌표, 공격력, 최근 공격 턴
-    else:
-        strongest = tlst
+
+    tlst.sort(key=lambda x: (x[2], (x[0] + x[1]), x[1]))  # -> 소팅은 키가 필요
+    strongest = tlst[0]  # 좌표, 공격력, 최근 공격 턴
     return strongest
 
 from collections import deque
@@ -81,6 +74,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
     # 공격!
     si,sj,spwr,s_turn=weakest
     ei,ej,epwr,e_turn=strongest
+    arr[si][sj] = [weakest[2], weakest[3]]
     path=bfs(si,sj,ei,ej) # 시작이랑 끝은 포함 X    # 튜플 좌표가 원소인 배열
 
     if path: # [2-1] 레이저 공격
@@ -92,7 +86,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
         path = []
         for di,dj in ((0,1),(1,0),(0,-1),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)):
             ni,nj=(ei+di)%N,(ej+dj)%M # 포탄 기준 8방향
-            if arr[ni][nj]>0: # 살아 있으면
+            if arr[ni][nj][0]>0: # 살아 있으면
                 path.append((ni,nj))
                 arr[ni][nj][0]-=(spwr//2) # 8방향에 있는 애들
     # 공격 대상
