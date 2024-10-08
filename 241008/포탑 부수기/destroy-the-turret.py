@@ -9,6 +9,7 @@ for i in range(N):
 def weak(turn):
     mn = 1001
     flag = 0
+    mlst=[]
     for i in range(N):
         for j in range(M):
             if arr[i][j][0] == 0:
@@ -53,11 +54,12 @@ def bfs(si,sj,ei,ej): # 레이저 공격 경로 반환 (ei,ej)까지 최단 경�
         ci,cj=q.popleft()
         for di,dj in ((0,1),(1,0),(0,-1),(-1,0)): # 우하좌상 네 방향
             ni,nj=(ci+di)%N,(cj+dj)%M # 건너편까지 가능
-            # 미방문 ---> ei,ej 도달하면 역추적
-            if v[ni][nj]==0:
+            # 미방문 ---> ei,ej 도달하면 역추적, 조건: 0이 아님
+            if v[ni][nj]==0 and arr[ni][nj][0]!=0:
                 q.append((ni,nj))
                 v[ni][nj]=(ci,cj) # 오기 바로 전 좌표
                 if (ni, nj) == (ei, ej):  # 대상에 도착 -> 역추적 시작
+                    path.append((ni, nj)) # 마지막 좌표도 추가
                     while True:
                         ni, nj = v[ni][nj]  # 그 전 좌표
                         if (ni, nj) == (si, sj):  # 처음 좌표면
@@ -65,6 +67,7 @@ def bfs(si,sj,ei,ej): # 레이저 공격 경로 반환 (ei,ej)까지 최단 경�
                         path.append((ni, nj))
     return False
 
+#+==============================================================
 for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 turn
     # [1] 공격자 선정
     weakest=weak(turn)
@@ -78,7 +81,7 @@ for turn in range(1,K+1): # arr[][][0] : 공격력 / arr[][][1] : 최근 공격 
     path=bfs(si,sj,ei,ej) # 시작이랑 끝은 포함 X    # 튜플 좌표가 원소인 배열
 
     if path: # [2-1] 레이저 공격
-        for pi,pj in path:
+        for pi,pj in path[0:-1]:
             if arr[pi][pj][0]>0: # 0이 아니면
                 arr[pi][pj][0]-= (spwr//2)
 
