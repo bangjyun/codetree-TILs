@@ -3,80 +3,60 @@ arr=[list(map(int,input().split())) for _ in range(N)]
 
 def pprint(arr):
     print("\n".join(" ".join(f"{elem:>3}" for elem in l) for l in  arr))
-p=0
-hit=()
-def dfs(si,sj,tidx,flag):
-    di=[1,-1,0,0]
-    dj=[0,0,1,-1]
-    global cnt
-    global hit
-
-    if (si,sj)==hit:
-        return None
-
-    if flag: # 몇 번째인지 찾는 flag
-        v[si][sj] = 1
+p=1
+from collections import deque
+def bfs(si,sj,tidx): # 자기 팀 만드는 함수
+    v=[[0]*N for _ in range(N)]
+    v[si][sj]=1
+    q=deque([(si,sj)])
+    team[tidx]=[(si,sj)]
+    di = [1, -1, 0, 0]
+    dj = [0, 0, 1, -1]
+    flag=0
+    while q:
+        ci,cj=q.popleft()
+        arr[ci][cj] = tidx # 머리
         for i in range(4):
-            ni, nj = si + di[i], sj + dj[i]
-            if 0 <= ni < N and 0 <= nj < N and v[ni][nj] == 0:
-                v[ni][nj] = 1
-                if arr[ni][nj] == tidx: # 우리 팀
-                    cnt+=1 #
-                    dfs(ni, nj, tidx, 1)
-
-    else:  # 팀번호 찾는 flag
-        arr[si][sj]=tidx
-        v[si][sj] = 1
-        for i in range(4):
-            ni,nj=si+di[i],sj+dj[i]
+            ni, nj = ci + di[i], cj + dj[i]
             if 0<=ni<N and 0<=nj<N and v[ni][nj]==0:
-                v[ni][nj]=1
-                if arr[ni][nj]==2:
-                    arr[ni][nj]=tidx
-                    dfs(ni,nj,tidx,0)
-                elif arr[ni][nj]==3:
-                    arr[ni][nj] = tidx
+                if arr[ni][nj]==2: # 몸통
                     team[tidx].append((ni,nj))
-                    return None
-    return None
+                    q.append((ni,nj))
+                    arr[ni][nj] = tidx
+                    v[ni][nj] = 1 # 나중에 방문할 곳은 1처리 하면 안 됨
+                    flag=1
+                     # 만약 2만 있는 쪽으로 탐색하다가 2가 없으면 3을 가려 한다? --> 2 만나면 break
+                elif flag and arr[ni][nj]==3:
+                    team[tidx].append((ni, nj))
+                    arr[ni][nj] = tidx
 
-team={} # 팀의 머리, 꼬리만 저장
+
+team={} # 팀 전체 저장
 tidx=11
 v = [[0] * N for _ in range(N)]
 for i in range(N):
     for j in range(N):
         if arr[i][j]==1:
-            team[tidx]=[(i,j)]
-            dfs(i,j,tidx,0) # 팀을 다 팀 아이디로!
+            bfs(i,j,tidx) # 팀을 다 팀 아이디로!
             tidx+=1
-
 #ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 tot_score=0
-hit=() # 맞은 사람 좌표
 for turn in range(K):
-    # [1] 머리 방향 이동
-    if p: print("\n")
-    if p: print("=========이동 전============")
-    if p: pprint(arr)
     for tidx in range(11,11+M): # 모든 팀 이동
+        # [1] 머리 방향 이동
         si,sj=team[tidx][0] # head
-        ei,ej=team[tidx][1] # tail
 
         di = [1, -1, 0, 0]
         dj = [0, 0, 1, -1]
-        for i in range(4):
-            ni, nj = ei + di[i], ej + dj[i]
-            if 0 <= ni < N and 0 <= nj < N and arr[ni][nj]==tidx: # 범위 내, 우리 팀
-                team[tidx][1]=(ni,nj) # 꼬리 업데이트
-                arr[ei][ej] = 4  # 꼬리 이동
 
+        ti,tj=team[tidx].pop() # 꼬리 pop
+        arr[ti][tj]=4 # 꼬리 이동
+        # 머리 이동
         for i in range(4):
             ni, nj = si + di[i], sj + dj[i]
             if 0 <= ni < N and 0 <= nj < N and arr[ni][nj]==4: # 길이 보임
-                team[tidx][0] = (ni, nj)  # 꼬리 업데이트
+                team[tidx].insert(0, (ni, nj))
                 arr[ni][nj] = tidx  # 머리 업데이트
-    if p:print("=========이동 후============")
-    if p:pprint(arr)
 
     # [2] 공 던지기
     if 0 <= turn % (4 * N) < N:
@@ -89,27 +69,16 @@ for turn in range(K):
         start, dir = (0, N - 1 - turn % N), (1, 0)
 
     si, sj = start
-    hit_team=0
+    hit_team = score = k = 0
 
-    score=0
-
-    v = [[0] * N for _ in range(N)]
     for i in range(N): # start에서 공 던지기
         ni, nj = si + dir[0] * i, sj + dir[1] * i
-        if arr[ni][nj]>10: # 누가 맞음
+        if arr[ni][nj] > 10:  # 누가 맞음
             hit_team=arr[ni][nj] # 맞은 팀 인덱스
-            hit=(ni,nj) # 최초에 만나는 사람
-            cnt = 1  #
-            head,tail = team[hit_team][0],team[hit_team][1]
-            if p: print(f"head: {team[hit_team][0]}")
-            dfs(head[0],head[1], hit_team,1)
-            score = cnt ** 2
-            team[hit_team][0],team[hit_team][1]=tail,head # 맞은 팀 방향 바꾸기
-            if p: print(f"head: {team[hit_team][0]}")
-            if p: print(f"{hit_team}팀 방향 변경")
-            tot_score += score
-            if p: print(f"{score} 획득, 총 점수 {tot_score}")
+            k=team[hit_team].index((ni,nj))+1
+            # 머리 꼬리 변경
+            team[hit_team]=team[hit_team][::-1]  # 맞은 팀 방향 바꾸기
+            tot_score += k**2
             break
-
 
 print(tot_score)
