@@ -23,10 +23,8 @@ op={0:2,1:3,2:0,3:1}
 
 for turn in range(1,K+1):
     for m in range(1,M+1):
-        try:
-            pi,pj,pd,ps,pgun = player[m]
-        except:
-            a=1
+        pi,pj,pd,ps,pgun = player[m]
+
         # [1] 방향으로 이동
         ni,nj=pi+dir[pd][0],pj+dir[pd][1]
         if not in_range(ni,nj):
@@ -34,9 +32,8 @@ for turn in range(1,K+1):
             player[m] = pi, pj, pd, ps, pgun # 업데이트
             ni, nj = pi + dir[pd][0], pj + dir[pd][1]
         arr[pi][pj]=0 # 원래 자리 비움
-        # pi,pj=ni,nj
-        # arr[ni][nj]=m # 이동 => 뒤에서 해줘야 함
 
+        # 그 ni, nj에서!!
         # [2] 플레이어 확인
         if arr[ni][nj]: # 사람이 있으면
             # Fight!
@@ -54,21 +51,20 @@ for turn in range(1,K+1):
             # 패자 처리
             li, lj, ld, ls, lgun = player[lose]
             # 총 내려놓음
-            if lgun==0:
-                gun[ni][nj].append(lgun)
+            if lgun!=0:
+                gun[ni][nj].append(lgun) # 내려놓고
+                lgun=0 # 총 없애기
 
             # 방향 이동
-            nni, nnj = li + dir[ld][0], lj + dir[ld][1]
-            if not in_range(nni, nnj) or arr[nni][nnj]>0 : # out range or 다른 플레이어?
-                while True: # 확인
-                    ld=(ld+1)%4
-                    nni, nnj = li + dir[ld][0], lj + dir[ld][1]
-                    if in_range(nni, nnj) and arr[nni][nnj]==0:
-                        break
-                if len(gun[nni][nnj]) > 0:  # 총 없으니
-                    lgun = max(gun[nni][nnj])  # 총 획득
+            while True:
+                nni, nnj = ni + dir[ld][0], nj + dir[ld][1]
+                if in_range(nni, nnj) and arr[nni][nnj]==0 : # in range and 빈 격자
+                    break
+                ld = (ld + 1) % 4
 
-                    gun[nni][nnj].remove(lgun)  # 가져간 건 지움
+            if len(gun[nni][nnj]) > 0:
+                lgun = max(gun[nni][nnj])  # 총 획득
+                gun[nni][nnj].remove(lgun)  # 가져간 건 지움
 
             player[lose]=nni,nnj,ld,ls,lgun
             arr[nni][nnj]=lose
@@ -77,20 +73,20 @@ for turn in range(1,K+1):
             # 승자 처리
             wi, wj, wd, ws, wgun = player[win]
             # print("좌표 동일한지 비교", "이긴 플레이어", wi, wj, "싸운 칸", ni, nj)
-            if len(gun[wi][wj])>0: # 총 있으면
+            if len(gun[ni][nj])>0: # 격자에 총 있으면
                 if wgun==0: # 플레이어 총 없으면
-                    wgun=max(gun[wi][wj])# 총 획득
-                    gun[wi][wj].remove(wgun) # 가져간 건 지움
+                    wgun=max(gun[ni][nj])# 총 획득
+                    gun[ni][nj].remove(wgun) # 가져간 건 지움
                 else: # 보유 총 이미 있으면
-                    gun[wi][wj].append(wgun) # 내 총 먼저 내려놓고
-                    wgun=max(gun[wi][wj]) # 가장 센 총 획득
-                    gun[wi][wj].remove(wgun) # 가져간 건 지움
-            player[win]=wi, wj, wd, ws, wgun  # 업데이트
-            arr[wi][wj]=win
+                    gun[ni][nj].append(wgun) # 내 총 먼저 내려놓고
+                    wgun=max(gun[ni][nj]) # 가장 센 총 획득
+                    gun[ni][nj].remove(wgun) # 가져간 건 지움
+            player[win]=ni, nj, wd, ws, wgun  # 업데이트
+            arr[ni][nj]=win
 
         else: # 사람이 없으면
             pi,pj=ni,nj
-            arr[ni][nj]=m # 이동 => 뒤에서 해줘야 함
+            arr[ni][nj]=m # 이동
              # 총 확인
             if len(gun[ni][nj])>0: # 총 있으면
                 if pgun==0: # 플레이어 총 없으면
