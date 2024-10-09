@@ -23,7 +23,10 @@ op={0:2,1:3,2:0,3:1}
 
 for turn in range(1,K+1):
     for m in range(1,M+1):
-        pi,pj,pd,ps,pgun = player[m]
+        try:
+            pi,pj,pd,ps,pgun = player[m]
+        except:
+            a=1
         # [1] 방향으로 이동
         ni,nj=pi+dir[pd][0],pj+dir[pd][1]
         if not in_range(ni,nj):
@@ -57,13 +60,17 @@ for turn in range(1,K+1):
             # 방향 이동
             nni, nnj = li + dir[ld][0], lj + dir[ld][1]
             if not in_range(nni, nnj) or arr[nni][nnj]>0 : # out range or 다른 플레이어?
-                while arr[nni][nnj]==0: # 확인
+                while True: # 확인
                     ld=(ld+1)%4
                     nni, nnj = li + dir[ld][0], lj + dir[ld][1]
+                    if in_range(nni, nnj) and arr[nni][nnj]==0:
+                        break
                 if len(gun[nni][nnj]) > 0:  # 총 없으니
                     lgun = max(gun[nni][nnj])  # 총 획득
+
                     gun[nni][nnj].remove(lgun)  # 가져간 건 지움
-            player[lose]=[nni,nnj,ld,lgun]
+
+            player[lose]=nni,nnj,ld,ls,lgun
             arr[nni][nnj]=lose
             # print("패자 이동",nni,nnj)
 
