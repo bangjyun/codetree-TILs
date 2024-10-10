@@ -45,11 +45,6 @@ for turn in range(K):
     blst=[] # 이동 전 좌표, 인원 수
     alst = []  # 이동 후 좌표, 인원 수
     flag = 0
-    for pi in range(N):
-        for pj in range(N):
-            if -11 < arr[pi][pj] < 0:  # 사람이 있으면
-                flag = 1
-    if not flag: break
     if p: print(f"===================={turn}턴 시작=====================")
     if p: pprint(arr)
 
@@ -80,6 +75,13 @@ for turn in range(K):
         tot_dist-=pnum
     for ai,aj,anum in alst:
         arr[ai][aj]+=anum # pnum은 (-인원수) -> 이만큼 빼줌
+
+    # 사람이 다 탈출? => break
+    for pi in range(N):
+        for pj in range(N):
+            if -11 < arr[pi][pj] < 0:  # 사람이 있으면
+                flag = 1
+    if not flag: break
 
     if p: print(f"===================={turn}턴 사람 이동 후=====================")
     if p: pprint(arr)
